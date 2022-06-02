@@ -1,0 +1,26 @@
+:root {
+    font-size: 62.5%;
+    --general-theme-bgcolor: #FFF;
+    --general-theme-color: #000;
+    --general-theme-font: sans-serif;
+    --normal-font-size: 1.4rem;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.container div {
+    padding: 1.5rem;
+    font-size: var(--normal-font-size);
+    font-family: var(--general-theme-font);
+}
+
+/* .container {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    grid-template-rows: auto 1fr;
+} */
