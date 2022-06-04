@@ -1,9 +1,17 @@
 :root {
     font-size: 62.5%;
-    --general-theme-bgcolor: #FFF;
+    --general-theme-bgcolor: #f87171;
     --general-theme-color: #000;
     --general-theme-font: sans-serif;
+    --shelf-theme-bgcolor: #b45309;
+    --shelf-item-theme-bgcolor: #1c1917;
+    --default-theme-bgcolor: #FFF;
+    --default-theme-color: #000;
+    --fade-theme-bgcolor: #bccbde; /* #e2e8f0 */
+    --largest-font-size: 2rem;
     --normal-font-size: 1.4rem;
+
+    --grid-min-size: 10rem;
 }
 
 * {
@@ -19,8 +27,70 @@
     font-family: var(--general-theme-font);
 }
 
-/* .container {
+.container {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+button.account {
+    width: 10rem;
+    height: 4rem;
+    font-weight: bold;
+    border-radius: 2rem;
+}
+
+div.main > h2 {
+    text-align: start;
+}
+
+div.main {
+    background-color: var(--fade-theme-bgcolor);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100% - 10vh - 10vh);
+}
+
+div.section {
+    --shelf-padding-and-gap: 2.5rem;
+
+    background-color: var(--shelf-theme-bgcolor);
+    border-radius: 1rem;
     display: grid;
-    grid-template-columns: 1fr 4fr;
-    grid-template-rows: auto 1fr;
-} */
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-size), 1fr));
+    grid-template-rows: repeat(auto-fill, minmax(var(--grid-min-size), 1fr));
+    grid-auto-rows: minmax(var(--grid-min-size), 1fr);
+    gap: var(--shelf-padding-and-gap);
+}
+
+div.hole {
+    background-color: var(--shelf-item-theme-bgcolor);
+    z-index: 0;
+}
+
+div.header,
+div.footer {
+    background-color: var(--general-theme-bgcolor);
+    min-height: 10vh;
+    display: flex;
+    align-items: center;
+}
+
+div.header {
+    justify-content: space-between;
+}
+
+div.footer {
+    justify-content: center;
+}
+
