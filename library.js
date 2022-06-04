@@ -17,15 +17,20 @@ window.addEventListener('resize', function() {
   
 
 function createHoles() {
-  const vertical = Math.floor(width / 100) - 2;
-  const horizontal = Math.floor(height / 100) - 2;
+  const dimensions = parseInt(getComputedStyle(main).getPropertyValue('--grid-min-size'));
+  const size = Number(dimensions * 10);
+
+  const vertical = Math.floor(width / size) - 2;
+  const horizontal = Math.floor(height / size) - 2;
 
   const remain = (vertical * horizontal) % 10;
   const holes = (vertical * horizontal) + (10 - remain);
 
   for (let index = 0; index < holes; index++) {
     let hole = document.createElement('div');
-    section.appendChild(hole).className = "hole";
+    section.appendChild(hole).className = 'hole';
+    let button = document.createElement('button');
+    hole.appendChild(button).className = 'add';
   };
 };
 
@@ -35,6 +40,8 @@ function removeHoles() {
     hole.remove();
   })
 }
+
+let library = [];
 
 function Book(title, author, pages, read) {
   this.title = title;
