@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   createHoles();
+  addButtons();
 }, false);
 
 const container = document.querySelector('.container');
@@ -13,9 +14,9 @@ let height = main.offsetHeight;
 window.addEventListener('resize', function() {
   removeHoles();
   createHoles();
+  addButtons();
 } );
   
-
 function createHoles() {
   const dimensions = parseInt(getComputedStyle(main).getPropertyValue('--grid-min-size'));
   const size = Number(dimensions * 10);
@@ -27,9 +28,9 @@ function createHoles() {
   const holes = (vertical * horizontal) + (10 - remain);
 
   for (let index = 0; index < holes; index++) {
-    let hole = document.createElement('div');
+    const hole = document.createElement('div');
     section.appendChild(hole).className = 'hole';
-    let button = document.createElement('button');
+    const button = document.createElement('button');
     hole.appendChild(button).className = 'add';
   };
 };
@@ -39,6 +40,19 @@ function removeHoles() {
   holes.forEach(hole => {
     hole.remove();
   })
+}
+
+function addButtons() {
+  const holes = section.querySelectorAll('.hole');
+  holes.forEach(hole => {
+    hole.querySelector('button.add').addEventListener('click', () => {
+      const overlay =  document.createElement('div');
+      container.appendChild(overlay).className = 'overlay';
+      container.querySelector('div.overlay').addEventListener('click', () => {
+        container.removeChild(container.querySelector('.overlay'));
+      });
+    });
+  });
 }
 
 let library = [];

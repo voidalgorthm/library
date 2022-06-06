@@ -25,6 +25,7 @@
     padding: 1.5rem;
     font-size: var(--normal-font-size);
     font-family: var(--general-theme-font);
+    z-index: 0;
 }
 
 .container {
@@ -32,6 +33,7 @@
     min-height: 100vh;
     flex-direction: column;
     justify-content: flex-start;
+    z-index: 0;
 }
 
 button {
@@ -93,6 +95,15 @@ button.add:hover {
     background: url('book-plus-outline.png') no-repeat center;
     background-color: var(--default-theme-bgcolor);
     border: 3px dashed var(--default-theme-color);
+}
+
+div.overlay {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 2;
+    cursor: pointer;
 }
 
 div.header,
