@@ -25,7 +25,6 @@ function createHoles() {
 
   // const remain = (vertical * horizontal) % 10;
   const holes = (vertical * horizontal);
-  console.log(holes);
 
   for (let index = 0; index < holes; index++) {
     const hole = document.createElement('div');
@@ -86,15 +85,18 @@ function createForm() {
   const readLabel = document.createElement('label');
   readLabel.appendChild(document.createTextNode('Have you read it before?:'));
   setAttributes(readLabel, { for: 'read' });
+  const checkbox = document.createElement('div');
+  checkbox.className = 'checkbox';
   const read = document.createElement('input');
   setAttributes(read, { type: 'checkbox', id: 'read', name: 'book_read' });
   const readCheck = document.createElement('label');
+  readCheck.className = 'readCheck';
   setAttributes(readCheck, { for: 'read' });
-
+  checkbox.appendChild(read);
+  checkbox.appendChild(readCheck);
   readLabelSection.className = 'reading';
   readLabelSection.appendChild(readLabel);
-  readLabelSection.appendChild(read);
-  readLabelSection.appendChild(readCheck);
+  readLabelSection.appendChild(checkbox);
   const submit = document.createElement('button');
   submit.textContent = 'Submit';
 
