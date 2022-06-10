@@ -229,7 +229,7 @@ input[type=checkbox]:checked+label:after {
     content: '✖';
     color: #aaa;
     position: relative;
-    left: 2.5rem;
+    left: 2rem;
     bottom: 3.5rem;
 }
 
@@ -261,8 +261,6 @@ input[type=checkbox]:checked+label {
 input[type=checkbox]:checked+label:after {
     left: 40px;
 }
-
-
 
 div.header,
 div.footer {
