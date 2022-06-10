@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function () {
 }, false);
 
 const container = document.querySelector('.container');
-
 const main = container.querySelector('.main');
 const section = main.querySelector('.section');
 
@@ -13,6 +12,23 @@ window.addEventListener('resize', function () {
   createHoles();
   addBook();
 });
+
+let library = [];
+
+class Book {
+  constructor(title, author, pages, read) {
+    this.title = title;
+    this.author = author;
+    this.pages = pages;
+    this.read = read;
+    this.info = function () {
+      return `${this.title} by ${this.author}, ${this.pages} pages, ${this.read}`;
+    }
+  }
+}
+
+const hobbit = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'have read');
+library.push(hobbit);
 
 function createHoles() {
   const dimensions = parseInt(getComputedStyle(main).getPropertyValue('--grid-min-size'));
@@ -47,7 +63,8 @@ function addBook() {
     hole.querySelector('button.add').addEventListener('click', () => {
       createForm();
       container.querySelector('div.overlay').addEventListener('click', (event) => {
-        if (event.target === container.querySelector('.overlay')) { removeForm(); } }, true);
+        if (event.target === container.querySelector('.overlay')) { removeForm(); }
+      }, true);
     });
   });
 }
@@ -112,38 +129,26 @@ function createForm() {
   });
 
   submit.addEventListener('click', () => {
+    checkCheckbox(read);
     const rawBooks = Object.values(form).reduce((obj, field) => { obj[field.name] = field.value; return obj }, {});
     let bookProperties = [];
-    Object.entries(rawBooks).forEach(([key, value]) => { if(key !== '') { bookProperties.push(value); } });
+    Object.entries(rawBooks).forEach(([key, value]) => { if (key !== '') { bookProperties.push(value); } });
     console.log(bookProperties);
-    
     const newBook = new Book(...bookProperties);
     library.push(newBook);
     console.log(library);
     removeForm();
   });
 
+  prompt.appendChild(form);
   overlay.appendChild(prompt).className = 'prompt';
   container.appendChild(overlay).className = 'overlay';
-  prompt.appendChild(form);
   title.focus();
 }
 
-let library = [];
-
-class Book {
-  constructor(title, author, pages, read) {
-    this.title = title;
-    this.author = author;
-    this.pages = pages;
-    this.read = read;
-    this.info = function () {
-      return `${this.title} by ${this.author}, ${this.pages} pages, ${this.read}`;
-    }
-  }
+function checkCheckbox(input) {
+  const read = input;
+  read.value = read.checked === true ? 'have read' : 'haven\'t read yet';
 }
-
-const hobbit = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'on');
-library.push(hobbit);
 
 function setAttributes(elem, attrs) { Object.entries(attrs).forEach(([key, value]) => elem.setAttribute(key, value)); }
