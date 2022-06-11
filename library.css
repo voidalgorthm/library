@@ -3,8 +3,9 @@
     --general-theme-bgcolor: #3b82f6;
     --general-theme-color: #000;
     --general-theme-font: sans-serif;
-    --shelf-theme-bgcolor: #b45309;
-    --shelf-item-theme-bgcolor: #27272a;
+    --outer-theme-bgcolor: #b45309;
+    --outer-item-theme-bgcolor: #27272a;
+    --inner-theme-bgcolor: #b91c1c;
     --default-theme-bgcolor: #FFF;
     --default-theme-color: #000;
     --fade-theme-bgcolor: #e5e7eb;
@@ -68,24 +69,49 @@ div.main {
 }
 
 div.section {
-    --shelf-padding-and-gap: 2.5rem;
+    --outer-padding-and-gap: 2.5rem;
 
-    padding: var(--shelf-padding-and-gap);
-    background-color: var(--shelf-theme-bgcolor);
+    padding: var(--outer-padding-and-gap);
+    background-color: var(--outer-theme-bgcolor);
     border-radius: var(--general-border-radius);
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-size), 1fr));
     grid-template-rows: repeat(auto-fill, minmax(var(--grid-min-size), 1fr));
     grid-auto-rows: minmax(var(--grid-min-size), 1fr);
-    gap: var(--shelf-padding-and-gap);
+    gap: var(--outer-padding-and-gap);
+    /* position: absolute; */
 }
 
-div.hole {
-    background-color: var(--shelf-item-theme-bgcolor);
-    display: grid;
-    place-items: center;
+div.section {
+    --outer-padding-and-gap: 2.5rem;
+
+    padding: var(--outer-padding-and-gap);
+    background-color: var(--outer-theme-bgcolor);
     border-radius: var(--general-border-radius);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-size), 1fr));
+    grid-template-rows: repeat(auto-fill, minmax(var(--grid-min-size), 1fr));
+    grid-auto-rows: minmax(var(--grid-min-size), 1fr);
+    gap: var(--outer-padding-and-gap);
+}
+
+
+div.binder {
+    background-color: var(--outer-item-theme-bgcolor);
+    color: var(--general-theme-color);
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-auto-rows: auto;
+    align-items: center;
+    /* justify-items: ; */
+    border-radius: var(--general-border-radius);
+    position: relative;
     z-index: 0;
+}
+
+div.binder.occupied {
+    background-color: var(--inner-theme-bgcolor);
 }
 
 button.add {
@@ -118,7 +144,7 @@ div.prompt {
     color: var(--default-theme-color);
     width: var(--grid-min-size);
     height: auto;
-    border: .5rem double var(--shelf-theme-bgcolor);
+    border: .5rem double var(--outer-theme-bgcolor);
     border-radius: var(--general-border-radius);
     display: flex;
     flex-direction: column;
@@ -212,7 +238,7 @@ input[type=checkbox] {
     top: 0;
     width: 100%;
     height: 100%;
-    z-index: 5;
+    z-index: 4;
     opacity: 0;
     cursor: pointer;
 }
@@ -239,7 +265,7 @@ input[type=checkbox]:checked+label:after {
     right: 2rem;
     top: 3rem;
     color: #000;
-    z-index: 1;
+    z-index: 3;
 }
 
 .checkbox label {

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-  createHoles();
-  addBook();
+  createBinders();
+  queueBooks();
 }, false);
 
 const container = document.querySelector('.container');
@@ -8,9 +8,9 @@ const main = container.querySelector('.main');
 const section = main.querySelector('.section');
 
 window.addEventListener('resize', function () {
-  removeHoles();
-  createHoles();
-  addBook();
+  removeBinders();
+  createBinders();
+  queueBooks();
 });
 
 let library = [];
@@ -29,8 +29,12 @@ class Book {
 
 const hobbit = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'have read');
 library.push(hobbit);
+/* const argh = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'not read');
+library.push(argh);
+const why = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'non read');
+library.push(why); */
 
-function createHoles() {
+function getScreenSize() {
   const dimensions = parseInt(getComputedStyle(main).getPropertyValue('--grid-min-size'));
   let width = main.offsetWidth;
   let height = main.offsetHeight;
@@ -41,31 +45,72 @@ function createHoles() {
 
   // const remain = (vertical * horizontal) % 10;
   const holes = (vertical * horizontal);
+  return holes;
+}
 
-  for (let index = 0; index < holes; index++) {
-    const hole = document.createElement('div');
-    section.appendChild(hole).className = 'hole';
-    const button = document.createElement('button');
-    hole.appendChild(button).className = 'add';
+function createBinders() {
+  const numberHoles = getScreenSize();
+
+  for (let index = 0; index < numberHoles; index++) {
+    const binder = document.createElement('div');
+    section.appendChild(binder).className = 'binder';
+    button = createButton();
+    binder.appendChild(button);
   };
 };
 
-function removeHoles() {
-  const holes = section.querySelectorAll('.hole');
-  holes.forEach(hole => {
-    hole.remove();
+function createButton() {
+  const button = document.createElement('button');
+  button.className = 'add';
+  button.addEventListener('click', () => {
+    createForm();
+    container.querySelector('div.overlay').addEventListener('click', (event) => {
+      if (event.target === container.querySelector('.overlay')) { removeForm(); }
+    }, true);
+  });
+  return button;
+}
+
+function removeBinders() {
+  const binders = section.querySelectorAll('.binder');
+  binders.forEach(binder => {
+    binder.remove();
   })
 }
 
-function addBook() {
-  const holes = section.querySelectorAll('.hole');
-  holes.forEach(hole => {
-    hole.querySelector('button.add').addEventListener('click', () => {
-      createForm();
-      container.querySelector('div.overlay').addEventListener('click', (event) => {
-        if (event.target === container.querySelector('.overlay')) { removeForm(); }
-      }, true);
-    });
+function queueBooks() {
+  if (Array.isArray(library) && !library.length) return;
+
+  const books = section.querySelectorAll('.binder');
+
+  for (let index = 0; index < books.length; index++) {
+    if(!library.hasOwnProperty(index)) break;
+    // typeof library[index] === 'undefined'
+    books[index].querySelector('button.add').remove();
+    const bookTitle = document.createElement('p');
+    bookTitle.textContent = library[index].title;
+    const bookAuthor = document.createElement('p');
+    bookAuthor.textContent = library[index]['author'];
+    const bookPages = document.createElement('p');
+    bookPages.textContent = library[index]['pages'];
+    const bookRead = document.createElement('p');
+    bookRead.textContent = library[index]['read'];
+    books[index].appendChild(bookTitle);
+    books[index].appendChild(bookAuthor);
+    books[index].appendChild(bookPages);
+    books[index].appendChild(bookRead);
+
+    books[index].classList.add('occupied');
+  }
+}
+
+function requeueBooks() {
+  const binders = section.querySelectorAll('.binder.occupied');
+  binders.forEach(binder => {
+    const elements = binder.querySelectorAll('p');
+    elements.forEach(element => { element.remove(); });
+    binder.classList.remove('occupied');
+    binder.appendChild(createButton());
   });
 }
 
@@ -133,11 +178,12 @@ function createForm() {
     const rawBooks = Object.values(form).reduce((obj, field) => { obj[field.name] = field.value; return obj }, {});
     let bookProperties = [];
     Object.entries(rawBooks).forEach(([key, value]) => { if (key !== '') { bookProperties.push(value); } });
-    console.log(bookProperties);
     const newBook = new Book(...bookProperties);
     library.push(newBook);
     console.log(library);
     removeForm();
+    requeueBooks();
+    queueBooks();
   });
 
   prompt.appendChild(form);
