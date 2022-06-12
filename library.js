@@ -27,18 +27,18 @@ class Book {
   }
 }
 
-const hobbit = new Book('Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo quis magnam deserunt doloribus omnis dicta', 'J.R.R. Tolkien', 295, 'haven\'t read yet');
+const potterphilostone = new Book('Harry Potter and the Philosopher\'s Stone', 'J. K. Rowling', 766, 'have read');
+const hobbit = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'haven\'t read yet');
 library.push(hobbit);
+library.push(potterphilostone);
 const qwe = new Book('pdqcdopsqcdqpscodpqeomqcpqprmpcdoqepdpqdqpweopqweqdqmcqdiqspcoqscqiepqwiepqiwe', 'pdqcdopsqcdqpscodpqeomqcpqprmpcdoqepdpqdqpweopqweqdqmcqdiqspcoqscqiepqwiepqiwe', 295, 'not read');
-const asd = new Book('dcqsomcdocdisocdspcdiscpdpscidpipdspcapoc[amcdsajdcascqpocdqsmckqrjqichoiqcdioquwenoiqcsduqpcdpqeqpnciq', 'dcqsomcdocdisocdspcdiscpdpscidpipdspcapoc[amcdsajdcascqpocdqsmckqrjqichoiqcdioquwenoiqcsduqpcdpqeqpnciq', 77, 'not read');
-// library.push(argh);
-// const why = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'non read');
-// library.push(why);
 
 function getScreenSize() {
   const dimensions = parseInt(getComputedStyle(main).getPropertyValue('--grid-min-size'));
   let width = main.offsetWidth;
+  // console.log(main.offsetWidth);
   let height = main.offsetHeight;
+  // console.log(main.offsetHeight);
   const size = Number(dimensions * 10);
 
   const vertical = Math.floor(width / size);
@@ -49,28 +49,24 @@ function getScreenSize() {
   return holes;
 }
 
-function createBinders() {
-  const numberHoles = getScreenSize();
+function recalibrateBinders() {
+  if ((section.querySelectorAll('.binder').length - 2) >= library.length) return;
 
-  for (let index = 0; index < numberHoles; index++) {
+  const binder = document.createElement('div');
+  button = addButton();
+  binder.appendChild(button);
+  section.appendChild(binder).className = 'binder';
+}
+
+function createBinders() {
+  const spaces = getScreenSize();
+  for (let index = 0; index < spaces; index++) {
     const binder = document.createElement('div');
-    section.appendChild(binder).className = 'binder';
     button = addButton();
     binder.appendChild(button);
-  };
+    section.appendChild(binder).className = 'binder';
+  }
 };
-
-function addButton() {
-  const button = document.createElement('button');
-  button.className = 'add';
-  button.addEventListener('click', () => {
-    createForm();
-    container.querySelector('div.overlay').addEventListener('click', (event) => {
-      if (event.target === container.querySelector('.overlay')) { removeForm(); }
-    }, true);
-  });
-  return button;
-}
 
 function removeBinders() {
   const binders = section.querySelectorAll('.binder');
@@ -79,53 +75,16 @@ function removeBinders() {
   })
 }
 
-function queueBooks() {
-  if (Array.isArray(library) && !library.length) return;
-
-  const books = section.querySelectorAll('.binder');
-
-  for (let index = 0; index < books.length; index++) {
-    if(!library.hasOwnProperty(index)) break;
-    // typeof library[index] === 'undefined'
-    books[index].querySelector('button.add').remove();
-    const bookTitle = document.createElement('div');
-    bookTitle.className = 'booktitle';
-    bookTitle.textContent = library[index].title;
-    const bookAuthor = document.createElement('div');
-    bookAuthor.textContent = library[index]['author'];
-    const bookPages = document.createElement('div');
-    bookPages.textContent = `${library[index]['pages']} pages`;
-    const bookRead = document.createElement('div');
-    bookRead.className = 'bookread';
-    const readButton = document.createElement('button');
-    readButton.className = 'switch';
-    setAttributes(readButton, { type: 'button', id: 'readbutton', name: 'readbutton' });
-    readButton.textContent = library[index]['read'];
-    bookRead.appendChild(readButton);
-    const bookControls = document.createElement('div');
-    bookControls.className = 'bookcontrol';
-    const bookEdit = document.createElement('button');
-    bookEdit.className = 'control';
-    setAttributes(bookEdit, { type: 'button', id: 'bookEdit', name: 'bookEdit' });
-    bookEdit.textContent = 'Edit';
-    const bookRemove = document.createElement('button');
-    bookRemove.className = 'control';
-    setAttributes(bookRemove, { type: 'button', id: 'bookRemove', name: 'bookRemove' });
-    bookRemove.textContent = 'Remove';
-
-
-
-    bookControls.appendChild(bookEdit);
-    bookControls.appendChild(bookRemove);
-    
-    books[index].appendChild(bookTitle);
-    books[index].appendChild(bookAuthor);
-    books[index].appendChild(bookPages);
-    books[index].appendChild(bookRead);
-    books[index].appendChild(bookControls);
-
-    books[index].classList.add('occupied');
-  }
+function addButton() {
+  const button = document.createElement('button');
+  button.className = 'add';
+  button.addEventListener('click', () => {
+    requeueBooks();
+    queueBooks();
+    console.log(library);
+    createForm();
+  });
+  return button;
 }
 
 function requeueBooks() {
@@ -138,12 +97,82 @@ function requeueBooks() {
   });
 }
 
+function queueBooks() {
+  if (Array.isArray(library) && !library.length) return;
+
+  const books = section.querySelectorAll('.binder');
+
+  for (let index = 0; index < books.length; index++) {
+    if (!library.hasOwnProperty(index)) break;
+    // typeof library[index] === 'undefined'
+    books[index].querySelector('button.add').remove();
+    const bookTitle = document.createElement('div');
+    bookTitle.className = 'booktitle';
+    bookTitle.textContent = library[index].title;
+    const bookAuthor = document.createElement('div');
+    bookAuthor.textContent = `by ${library[index]['author']}`;
+    const bookPages = document.createElement('div');
+    bookPages.textContent = `${library[index]['pages']} pages`;
+    const bookRead = document.createElement('div');
+    const readButton = document.createElement('button');
+    readButton.className = 'switch';
+    setAttributes(readButton, { type: 'button', id: 'readbutton', name: 'readbutton' });
+    readButton.textContent = library[index]['read'];
+    bookRead.appendChild(readButton);
+    const bookControls = document.createElement('div');
+    bookControls.className = 'bookcontrol';
+
+    const bookEdit = document.createElement('button');
+    bookEdit.className = 'control';
+    setAttributes(bookEdit, { type: 'button', id: 'bookEdit', name: 'bookEdit' });
+    bookEdit.textContent = 'Edit';
+    bookEdit.addEventListener('click', () => {
+      const edit = books[index];
+      createForm();
+      getBookDetails(edit);
+      requeueBooks();
+      queueBooks();
+      console.log(library);
+    });
+
+    const bookRemove = document.createElement('button');
+    bookRemove.className = 'control';
+    setAttributes(bookRemove, { type: 'button', id: 'bookRemove', name: 'bookRemove' });
+    bookRemove.textContent = 'Remove';
+    bookRemove.addEventListener('click', () => {
+      library.pop(books[index].remove());
+      requeueBooks();
+      queueBooks();
+      console.log(library);
+    });
+
+    bookControls.appendChild(bookEdit);
+    bookControls.appendChild(bookRemove);
+
+    books[index].appendChild(bookTitle);
+    books[index].appendChild(bookAuthor);
+    books[index].appendChild(bookPages);
+    books[index].appendChild(bookRead);
+    books[index].appendChild(bookControls);
+
+    books[index].classList.add('occupied');
+  }
+}
+
+function getBookDetails(book) {
+  const prompt = document.getElementsByTagName('form');
+  console.log(prompt);
+}
+
 function removeForm() {
   container.removeChild(container.querySelector('.overlay'));
 }
 
 function createForm() {
   const overlay = document.createElement('div');
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) { removeForm(); }
+  });
   const prompt = document.createElement('div');
   const label = document.createElement('h2');
 
@@ -206,6 +235,7 @@ function createForm() {
     library.push(newBook);
     console.log(library);
     removeForm();
+    recalibrateBinders();;
     requeueBooks();
     queueBooks();
   });
