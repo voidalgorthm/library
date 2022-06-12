@@ -31,8 +31,7 @@ class Book {
 const potterphilostone = new Book('Harry Potter and the Philosopher\'s Stone', 'J. K. Rowling', 766, 'on');
 const hobbit = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'off');
 library.push(hobbit);
-// library.push(potterphilostone);
-const qwe = new Book('pdqcdopsqcdqpscodpqeomqcpqprmpcdoqepdpqdqpweopqweqdqmcqdiqspcoqscqiepqwiepqiwe', 'pdqcdopsqcdqpscodpqeomqcpqprmpcdoqepdpqdqpweopqweqdqmcqdiqspcoqscqiepqwiepqiwe', 295, 'not read');
+library.push(potterphilostone);
 
 function getScreenSize() {
   const dimensions = parseInt(getComputedStyle(main).getPropertyValue('--grid-min-size'));
@@ -95,6 +94,12 @@ function requeueBooks() {
   });
 }
 
+function updateRead(button) {
+  button.style.backgroundColor = button.value === 'on'
+    ? getComputedStyle(main).getPropertyValue('--valid-theme-bgcolor')
+    : getComputedStyle(main).getPropertyValue('--invalid-theme-bgcolor');
+}
+
 function queueBooks() {
   if (Array.isArray(library) && !library.length) return;
 
@@ -116,7 +121,17 @@ function queueBooks() {
     readButton.className = 'switch';
     setAttributes(readButton, { type: 'button', id: 'readbutton', name: 'readbutton' });
     readButton.textContent = valueToReadable(library[index]['read']);
+    readButton.value = library[index]['read'];
+    updateRead(readButton);
+
+    readButton.addEventListener('click', () => {
+      readButton.value = (readButton.value === 'on') ? 'off' : 'on';
+      library[index]['read'] = (library[index]['read'] === 'on') ? 'off' : 'on';
+      updateRead(readButton);
+      readButton.textContent = valueToReadable(readButton.value);
+    });
     bookRead.appendChild(readButton);
+
     const bookControls = document.createElement('div');
     bookControls.className = 'bookcontrol';
 
@@ -161,17 +176,16 @@ function getBookDetails(book, index) {
   createForm(index);
   const form = container.querySelector('.overlay').querySelector('.prompt').querySelector('form');
   const inputs = form.querySelectorAll('label > input, div.reading > div.checkbox > input');
-  let val = [];
-  val = Object.values(book);
+  // let vals = [];
+  // vals = Object.values(book);
   inputs.forEach(input => {
     Object.entries(book).forEach(([key, val]) => {
       if (key === input.id) {
-         if (key === 'read') input.checked = readableToCheck(val);
+        if (key === 'read') input.checked = readableToCheck(val);
         else input.value = val;
       }
     });
   });
-  library.splice(index, 1);
 }
 
 function removeForm() {
@@ -240,7 +254,8 @@ function createForm(index) {
     read.value = checkToValue(read.checked);
     const rawBook = getBookData(form);
     const newBook = new Book(...rawBook);
-    if(isModify) library.splice(index, 0, newBook);
+    // library.splice(index, 1);
+    if (isModify) library.splice(index, 1, newBook);
     else library.push(newBook);
     removeForm();
     recalibrateBinders();;

@@ -4,13 +4,12 @@
     --default-theme-color: #000;
 
     --general-theme-bgcolor: #3b82f6;
-    --general-theme-color: #000;
-    --general-theme-font: sans-serif;
-    --fade-theme-bgcolor: #e5e7eb;
+    --general-theme-font: monospace, serif, sans-serif;
+    --fade-theme-bgcolor: #cbd5e1;
 
     --outer-theme-bgcolor: #b45309;
     --outer-item-theme-bgcolor: #27272a;
-    --book-theme-bgcolor: #973431;
+    --book-theme-bgcolor: #e11d48;
     --book-title-theme-bgcolor: #cfa92a;
 
     --valid-theme-bgcolor: #22c55e;
@@ -50,6 +49,7 @@ button {
     background-color: var(--general-theme-bgcolor);
     height: 5rem;
     cursor: pointer;
+    font-family: var(--general-theme-font);
     font-size: var(--larger-font-size);
     font-weight: bold;
     border-radius: var(--general-border-radius);
@@ -66,7 +66,7 @@ button:active {
 
 button.account {
     width: 10rem;
-    border: 1px solid var(--general-theme-color);
+    border: 1px solid var(--default-theme-color);
 }
 
 button.switch {
@@ -118,7 +118,7 @@ div.section {
 
 div.binder {
     background-color: var(--outer-item-theme-bgcolor);
-    color: var(--general-theme-color);
+    color: var(--default-theme-color);
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr auto;
