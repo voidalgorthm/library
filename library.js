@@ -13,6 +13,7 @@ window.addEventListener('resize', function () {
   queueBooks();
 });
 
+let isModify = false;
 let library = [];
 
 class Book {
@@ -27,18 +28,16 @@ class Book {
   }
 }
 
-const potterphilostone = new Book('Harry Potter and the Philosopher\'s Stone', 'J. K. Rowling', 766, 'have read');
-const hobbit = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'haven\'t read yet');
+const potterphilostone = new Book('Harry Potter and the Philosopher\'s Stone', 'J. K. Rowling', 766, 'on');
+const hobbit = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'off');
 library.push(hobbit);
-library.push(potterphilostone);
+// library.push(potterphilostone);
 const qwe = new Book('pdqcdopsqcdqpscodpqeomqcpqprmpcdoqepdpqdqpweopqweqdqmcqdiqspcoqscqiepqwiepqiwe', 'pdqcdopsqcdqpscodpqeomqcpqprmpcdoqepdpqdqpweopqweqdqmcqdiqspcoqscqiepqwiepqiwe', 295, 'not read');
 
 function getScreenSize() {
   const dimensions = parseInt(getComputedStyle(main).getPropertyValue('--grid-min-size'));
   let width = main.offsetWidth;
-  // console.log(main.offsetWidth);
   let height = main.offsetHeight;
-  // console.log(main.offsetHeight);
   const size = Number(dimensions * 10);
 
   const vertical = Math.floor(width / size);
@@ -81,7 +80,6 @@ function addButton() {
   button.addEventListener('click', () => {
     requeueBooks();
     queueBooks();
-    console.log(library);
     createForm();
   });
   return button;
@@ -100,11 +98,11 @@ function requeueBooks() {
 function queueBooks() {
   if (Array.isArray(library) && !library.length) return;
 
+  console.log(library);
   const books = section.querySelectorAll('.binder');
 
   for (let index = 0; index < books.length; index++) {
     if (!library.hasOwnProperty(index)) break;
-    // typeof library[index] === 'undefined'
     books[index].querySelector('button.add').remove();
     const bookTitle = document.createElement('div');
     bookTitle.className = 'booktitle';
@@ -117,7 +115,7 @@ function queueBooks() {
     const readButton = document.createElement('button');
     readButton.className = 'switch';
     setAttributes(readButton, { type: 'button', id: 'readbutton', name: 'readbutton' });
-    readButton.textContent = library[index]['read'];
+    readButton.textContent = valueToReadable(library[index]['read']);
     bookRead.appendChild(readButton);
     const bookControls = document.createElement('div');
     bookControls.className = 'bookcontrol';
@@ -127,9 +125,9 @@ function queueBooks() {
     setAttributes(bookEdit, { type: 'button', id: 'bookEdit', name: 'bookEdit' });
     bookEdit.textContent = 'Edit';
     bookEdit.addEventListener('click', () => {
-      const edit = books[index];
-      createForm();
-      getBookDetails(edit);
+      isModify = true;
+      const edit = library[index];
+      getBookDetails(edit, index);
       requeueBooks();
       queueBooks();
       console.log(library);
@@ -140,7 +138,7 @@ function queueBooks() {
     setAttributes(bookRemove, { type: 'button', id: 'bookRemove', name: 'bookRemove' });
     bookRemove.textContent = 'Remove';
     bookRemove.addEventListener('click', () => {
-      library.pop(books[index].remove());
+      library.splice(index, 1);
       requeueBooks();
       queueBooks();
       console.log(library);
@@ -159,16 +157,28 @@ function queueBooks() {
   }
 }
 
-function getBookDetails(book) {
-  const prompt = document.getElementsByTagName('form');
-  console.log(prompt);
+function getBookDetails(book, index) {
+  createForm(index);
+  const form = container.querySelector('.overlay').querySelector('.prompt').querySelector('form');
+  const inputs = form.querySelectorAll('label > input, div.reading > div.checkbox > input');
+  let val = [];
+  val = Object.values(book);
+  inputs.forEach(input => {
+    Object.entries(book).forEach(([key, val]) => {
+      if (key === input.id) {
+         if (key === 'read') input.checked = readableToCheck(val);
+        else input.value = val;
+      }
+    });
+  });
+  library.splice(index, 1);
 }
 
 function removeForm() {
   container.removeChild(container.querySelector('.overlay'));
 }
 
-function createForm() {
+function createForm(index) {
   const overlay = document.createElement('div');
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) { removeForm(); }
@@ -214,7 +224,7 @@ function createForm() {
   readLabelSection.appendChild(checkbox);
   const submit = document.createElement('button');
   setAttributes(submit, { type: 'submit', form: 'Books', formaction: 'post' });
-  submit.textContent = 'Submit';
+  submit.textContent = isModify === true ? 'Save' : 'Submit';
 
   form.appendChild(titleLabel);
   form.appendChild(authorLabel);
@@ -227,17 +237,16 @@ function createForm() {
   });
 
   submit.addEventListener('click', () => {
-    checkCheckbox(read);
-    const rawBooks = Object.values(form).reduce((obj, field) => { obj[field.name] = field.value; return obj }, {});
-    let bookProperties = [];
-    Object.entries(rawBooks).forEach(([key, value]) => { if (key !== '') { bookProperties.push(value); } });
-    const newBook = new Book(...bookProperties);
-    library.push(newBook);
-    console.log(library);
+    read.value = checkToValue(read.checked);
+    const rawBook = getBookData(form);
+    const newBook = new Book(...rawBook);
+    if(isModify) library.splice(index, 0, newBook);
+    else library.push(newBook);
     removeForm();
     recalibrateBinders();;
     requeueBooks();
     queueBooks();
+    isModify = false;
   });
 
   prompt.appendChild(form);
@@ -246,9 +255,26 @@ function createForm() {
   title.focus();
 }
 
-function checkCheckbox(input) {
-  const read = input;
-  read.value = read.checked === true ? 'have read' : 'haven\'t read yet';
+function checkToValue(status) {
+  let value = status === true ? 'on' : 'off';
+  return value;
+}
+
+function valueToReadable(status) {
+  let readable = status === 'on' ? 'have read' : 'haven\'t read yet';
+  return readable;
+}
+
+function readableToCheck(status) {
+  let check = status === 'on' ? true : false;
+  return check;
+};
+
+function getBookData(form) {
+  const rawBooks = Object.values(form).reduce((obj, field) => { obj[field.name] = field.value; return obj }, {});
+  let bookProperties = [];
+  Object.entries(rawBooks).forEach(([key, value]) => { if (key !== '') { bookProperties.push(value); } });
+  return bookProperties;
 }
 
 function setAttributes(elem, attrs) { Object.entries(attrs).forEach(([key, value]) => elem.setAttribute(key, value)); }
