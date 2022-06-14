@@ -33,7 +33,7 @@ const hobbit = new Book('The Hobbit', 'J.R.R. Tolkien', 295, 'off');
 library.push(hobbit);
 library.push(potterphilostone);
 
-function getScreenSize() {
+const getScreenSize = () => {
   const dimensions = parseInt(getComputedStyle(main).getPropertyValue('--grid-min-size'));
   let width = main.offsetWidth;
   let height = main.offsetHeight;
@@ -73,7 +73,7 @@ function removeBinders() {
   })
 }
 
-function addButton() {
+const addButton = () => {
   const button = document.createElement('button');
   button.className = 'add';
   button.addEventListener('click', () => {
@@ -94,7 +94,7 @@ function requeueBooks() {
   });
 }
 
-function updateRead(button) {
+const updateRead = (button) => {
   button.style.backgroundColor = button.value === 'on'
     ? getComputedStyle(main).getPropertyValue('--valid-theme-bgcolor')
     : getComputedStyle(main).getPropertyValue('--invalid-theme-bgcolor');
@@ -145,7 +145,6 @@ function queueBooks() {
       getBookDetails(edit, index);
       requeueBooks();
       queueBooks();
-      console.log(library);
     });
 
     const bookRemove = document.createElement('button');
@@ -172,12 +171,10 @@ function queueBooks() {
   }
 }
 
-function getBookDetails(book, index) {
+const getBookDetails = (book, index) => {
   createForm(index);
   const form = container.querySelector('.overlay').querySelector('.prompt').querySelector('form');
   const inputs = form.querySelectorAll('label > input, div.reading > div.checkbox > input');
-  // let vals = [];
-  // vals = Object.values(book);
   inputs.forEach(input => {
     Object.entries(book).forEach(([key, val]) => {
       if (key === input.id) {
@@ -188,38 +185,49 @@ function getBookDetails(book, index) {
   });
 }
 
+const getBookData = (form) => {
+  const rawBooks = Object.values(form).reduce((obj, field) => { obj[field.name] = field.value; return obj }, {});
+  let bookProperties = [];
+  Object.entries(rawBooks).forEach(([key, value]) => { if (key !== '') { bookProperties.push(value); } });
+  return bookProperties;
+}
+
 function removeForm() {
   container.removeChild(container.querySelector('.overlay'));
 }
 
 function createForm(index) {
   const overlay = document.createElement('div');
-  overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) { removeForm(); }
-  });
+  overlay.addEventListener('click', (event) => { if (event.target === overlay) { removeForm(); } });
   const prompt = document.createElement('div');
   const label = document.createElement('h2');
 
   label.appendChild(document.createTextNode('New Book:'));
   prompt.appendChild(label);
   const form = document.createElement('form');
-  setAttributes(form, { method: 'post', id: 'Books' });
+  setAttributes(form, { method: 'post', id: 'booksForm' });
 
   const titleLabel = document.createElement('label');
   titleLabel.appendChild(document.createTextNode('Title:'));
   const title = document.createElement('input');
-  setAttributes(title, { type: 'text', id: 'title', name: 'title' });
+  setAttributes(title, { type: 'text', id: 'title', name: 'title', autocomplete: 'off' });
+  const titleSpan = document.createElement('span');
   titleLabel.appendChild(title);
+  titleLabel.appendChild(titleSpan);
   const authorLabel = document.createElement('label');
   authorLabel.appendChild(document.createTextNode('Author:'));
   const author = document.createElement('input');
-  setAttributes(author, { type: 'text', id: 'author', name: 'author' });
+  setAttributes(author, { type: 'text', id: 'author', name: 'author', autocomplete: 'off' });
+  const authorSpan = document.createElement('span');
   authorLabel.appendChild(author);
+  authorLabel.appendChild(authorSpan);
   const pagesLabel = document.createElement('label');
   pagesLabel.appendChild(document.createTextNode('Pages:'));
   const pages = document.createElement('input');
-  setAttributes(pages, { type: 'number', id: 'pages', name: 'pages' });
+  setAttributes(pages, { type: 'number', id: 'pages', name: 'pages', autocomplete: 'off' });
+  const pagesSpan = document.createElement('span');
   pagesLabel.appendChild(pages);
+  pagesLabel.appendChild(pagesSpan);
   const readLabelSection = document.createElement('div');
   const readLabel = document.createElement('label');
   readLabel.appendChild(document.createTextNode('Have you read it before?:'));
@@ -227,7 +235,7 @@ function createForm(index) {
   const checkbox = document.createElement('div');
   checkbox.className = 'checkbox';
   const read = document.createElement('input');
-  setAttributes(read, { type: 'checkbox', id: 'read', name: 'read' });
+  setAttributes(read, { type: 'checkbox', id: 'read', name: 'read', autocomplete: 'off' });
   const readCheck = document.createElement('label');
   readCheck.className = 'readCheck';
   setAttributes(readCheck, { for: 'read' });
@@ -237,7 +245,7 @@ function createForm(index) {
   readLabelSection.appendChild(readLabel);
   readLabelSection.appendChild(checkbox);
   const submit = document.createElement('button');
-  setAttributes(submit, { type: 'submit', form: 'Books', formaction: 'post' });
+  setAttributes(submit, { type: 'submit', form: 'booksForm', formaction: 'post' });
   submit.textContent = isModify === true ? 'Save' : 'Submit';
 
   form.appendChild(titleLabel);
@@ -246,22 +254,31 @@ function createForm(index) {
   form.appendChild(readLabelSection);
   form.appendChild(submit);
 
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-  });
+  validateAfter(form);
 
   submit.addEventListener('click', () => {
     read.value = checkToValue(read.checked);
-    const rawBook = getBookData(form);
-    const newBook = new Book(...rawBook);
-    // library.splice(index, 1);
-    if (isModify) library.splice(index, 1, newBook);
-    else library.push(newBook);
-    removeForm();
-    recalibrateBinders();;
-    requeueBooks();
-    queueBooks();
-    isModify = false;
+  });
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    let validTitle = checkTitle(), validAuthor = checkAuthor(), validPages = checkPages();
+    let validForm = validTitle && validAuthor && validPages;
+
+    if (!validForm) form.querySelector('input.error').focus();
+
+    if (validForm) {
+      const rawBook = getBookData(form);
+      const newBook = new Book(...rawBook);
+      isModify === true ? library.splice(index, 1, newBook) : library.push(newBook);
+      // library.splice(index, 1);
+      removeForm();
+      recalibrateBinders();;
+      requeueBooks();
+      queueBooks();
+      isModify = false;
+    }
   });
 
   prompt.appendChild(form);
@@ -270,26 +287,110 @@ function createForm(index) {
   title.focus();
 }
 
+const validateAfter = (form) => {
+  const inputs = form.querySelectorAll('label > input');
+  inputs.forEach(input => {
+    input.addEventListener('focusout', (event) => {
+      switch (event.target.id) {
+        case 'title':
+          checkTitle();
+          break;
+        case 'author':
+          checkAuthor();
+          break;
+        case 'pages':
+          checkPages();
+          break;
+      }
+    })
+  });
+}
+
+const isRequired = value => value === '' ? false : true;
+const isBetween = (length, min, max) => length < min || length > max ? false : true;
+
+const checkTitle = () => {
+  const titleInput = document.querySelector('#title');
+  let valid = false;
+  const min = 1,
+    max = 200;
+  const title = titleInput.value.trim();
+
+  if (!isRequired(title)) {
+    showError(titleInput, 'Title cannot be blank.');
+  } else if (!isBetween(title.length, min, max)) {
+    showError(titleInput, `Title must be between ${min} and ${max} characters.`)
+  } else {
+    showSuccess(titleInput);
+    valid = true;
+  }
+  return valid;
+};
+
+const checkAuthor = () => {
+  const authorInput = document.querySelector('#author');
+  let valid = false;
+  const min = 1,
+    max = 200;
+  const author = authorInput.value.trim();
+
+  if (!isRequired(author)) {
+    showError(authorInput, 'Author cannot be blank.');
+  } else if (!isBetween(author.length, min, max)) {
+    showError(authorInput, `Author must be between ${min} and ${max} characters.`)
+  } else {
+    showSuccess(authorInput);
+    valid = true;
+  }
+  return valid;
+};
+
+const checkPages = () => {
+  const pagesInput = document.querySelector('#pages');
+  let valid = false;
+  const min = 1,
+    max = 10000;
+  const pages = pagesInput.value.trim();
+
+  if (!isRequired(pages)) {
+    showError(pagesInput, 'Pages cannot be blank.');
+  } else if (!isBetween(pages, min, max)) {
+    showError(pagesInput, `Pages must be between the numbers of ${min} and ${max}.`)
+  } else {
+    showSuccess(pagesInput);
+    valid = true;
+  }
+  return valid;
+};
+
+const showError = (input, message) => {
+  const formField = input.parentElement;
+  input.classList.remove('success');
+  input.classList.add('error');
+
+  const error = formField.querySelector('span');
+  error.textContent = message;
+};
+
+const showSuccess = (input) => {
+  const formField = input.parentElement;
+  input.classList.remove('error');
+  input.classList.add('success');
+
+  const error = formField.querySelector('span');
+  error.textContent = '';
+}
+
 function checkToValue(status) {
-  let value = status === true ? 'on' : 'off';
-  return value;
+  return status === true ? 'on' : 'off';
 }
 
 function valueToReadable(status) {
-  let readable = status === 'on' ? 'have read' : 'haven\'t read yet';
-  return readable;
+  return status === 'on' ? 'have read' : 'haven\'t read yet';
 }
 
 function readableToCheck(status) {
-  let check = status === 'on' ? true : false;
-  return check;
+  return status === 'on' ? true : false;
 };
-
-function getBookData(form) {
-  const rawBooks = Object.values(form).reduce((obj, field) => { obj[field.name] = field.value; return obj }, {});
-  let bookProperties = [];
-  Object.entries(rawBooks).forEach(([key, value]) => { if (key !== '') { bookProperties.push(value); } });
-  return bookProperties;
-}
 
 function setAttributes(elem, attrs) { Object.entries(attrs).forEach(([key, value]) => elem.setAttribute(key, value)); }
