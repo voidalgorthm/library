@@ -9,7 +9,7 @@ const section = main.querySelector('.section');
 
 window.addEventListener('resize', function () {
   removeBinders();
-  createBinders();
+  recalibrateBinders();
   queueBooks();
 });
 
@@ -48,12 +48,21 @@ const getScreenSize = () => {
 }
 
 function recalibrateBinders() {
-  if ((section.querySelectorAll('.binder').length - 2) >= library.length) return;
+  if ((section.querySelectorAll('.binder').length - 1) > library.length) return;
 
-  const binder = document.createElement('div');
-  button = addButton();
-  binder.appendChild(button);
-  section.appendChild(binder).className = 'binder';
+  let add = 1;
+  if (library.length >= section.querySelectorAll('.binder').length) {
+    add = library.length - section.querySelectorAll('.binder').length;
+    add += 1;
+  }
+  console.log(add);
+
+  for (let index = 1; index <= add; index++) {
+    const binder = document.createElement('div');
+    button = addButton();
+    binder.appendChild(button);
+    section.appendChild(binder).className = 'binder';
+  }
 }
 
 function createBinders() {
@@ -274,7 +283,7 @@ function createForm(index) {
       isModify === true ? library.splice(index, 1, newBook) : library.push(newBook);
       // library.splice(index, 1);
       removeForm();
-      recalibrateBinders();;
+      recalibrateBinders();
       requeueBooks();
       queueBooks();
       isModify = false;
